@@ -23,7 +23,7 @@ resource "aws_instance" "medicure-pro" {
   }
 
   provisioner "local-exec" {
-    command = "ansible-playbook /var/lib/jenkins/workspace/medicure-project/medicure-pro/ansible-playbook.yml"
+    command = "ansible-playbook /var/lib/jenkins/workspace/medicure-peoject/medicure-pro/ansible-playbook.yml"
   }
 }
 
