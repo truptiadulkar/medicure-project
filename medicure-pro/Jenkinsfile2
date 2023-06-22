@@ -1,0 +1,55 @@
+pipeline {
+  agent any
+
+  tools {
+    maven 'M2_HOME'
+    }
+  
+  stages {
+    stage('CheckOut') {
+      steps {
+        echo 'Checkout the source code from GitHub'
+        git 'https://github.com/truptiadulkar/finance-project.git'
+            }
+    }
+    stage('Package the Application') {
+      steps {
+        echo " Packaing the Application"
+        sh 'mvn clean package'
+            }
+    }
+    
+    stage('Publish Reports using HTML') {
+      steps {
+      publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: '/var/lib/jenkins/workspace/finance-project/target/surefire-reports', reportFiles: 'index.html', reportName: 'HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+      }
+   }
+    stage('Docker Image Creation') {
+       steps {
+         sh 'docker build -t trupti20/finance-me-project:latest .'
+             }
+       } 
+     stage('Docker Login') {
+       steps {
+         withCredentials([usernamePassword(credentialsId: 'dockerhubcred', passwordVariable: 'dockerhubpassword', usernameVariable: 'dockerhubuser')]) {         
+         sh "docker login -u ${env.dockerhubuser} -p ${env.dockerhubpassword}"
+   }  
+             }
+         }
+      stage('Push Image to DockerHub') {
+       steps {
+         sh 'docker push trupti20/finance-me-project:latest'
+            }
+        }
+      stage('Configure test-server with Terraform, Ansible and then Deploying') {
+        steps {
+            dir('test-server'){
+            sh 'chmod 600 keypairpem.pem'
+            sh 'terraform init'
+            sh 'terraform validate'
+            sh 'terraform apply --auto-approve'
+            }
+       }
+    }
+  }
+}
