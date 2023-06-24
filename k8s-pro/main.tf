@@ -23,7 +23,7 @@ resource "aws_instance" "k8s-pro" {
   }
 
   provisioner "local-exec" {
-    command = "ansible-playbook /var/lib/jenkins/workspace/k8s-pro/k8s-pro/ansible-playbook.yml"
+    command = "ansible-playbook /var/lib/jenkins/workspace/k8s-pro/k8s-pro/deployment.yaml"
   }
 }
 
